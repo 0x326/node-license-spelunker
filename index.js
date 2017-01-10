@@ -41,7 +41,7 @@ function doLevel(nodePath) {
     modules.push({
       name: pkg.name,
       version: pkg.version,
-      url: 'http://npmjs.org/package/' + pkg.name,
+      url: 'https://www.npmjs.com/package/' + pkg.name,
       localPath: path.relative(projPath,nodePath),
       pkgLicense: pkg.license,
       license: license
