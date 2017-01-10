@@ -51,12 +51,14 @@ function doLevel(nodePath) {
     if (count == 0) {
       var noLicenseFile = modules.filter(function (m) { return m.license === 'NO LICENSE FILE' });
       var andNoPkgJsonLicense = noLicenseFile.filter(function (m) { return !m.pkgLicense });
-      console.log('LICENSE FILE REPORT FOR ', topPkg.name);
+      console.log('# LICENSE FILE REPORT FOR', topPkg.name);
+      console.log('');
       console.log(modules.length + ' nested dependencies')
       console.log(noLicenseFile.length +  ' without identifiable license text')
       console.log(andNoPkgJsonLicense.length +  ' without even a package.json license declaration', '\n\n')
       modules.forEach(function(m) {
-        console.log((modules.indexOf(m)+1) + ' ----------------------------------------------------------------------------');
+        console.log('##', m.name);
+        console.log('');
         console.log(m.name + '@' + m.version);
         console.log(m.url);
         console.log(m.localPath);
