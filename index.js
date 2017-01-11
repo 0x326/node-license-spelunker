@@ -144,18 +144,29 @@ function exploreDependencies(packagePath) {
  * @return undefined
  */
 function findLicenseText(projectPath, callback) {
-  let possibleLicensePaths = [
-    path.join(projectPath, 'LICENSE'),
-    path.join(projectPath, 'LICENCE'),
-    path.join(projectPath, 'LICENSE.md'),
-    path.join(projectPath, 'LICENSE.txt'),
-    path.join(projectPath, 'LICENSE-MIT'),
-    path.join(projectPath, 'LICENSE-BSD'),
-    path.join(projectPath, 'MIT-LICENSE.txt'),
-    path.join(projectPath, 'Readme.md'),
-    path.join(projectPath, 'README.md'),
-    path.join(projectPath, 'README.markdown')
+  let possibleLicensePaths = [];
+  let possibleLicenseNames = [
+    'LICENSE',
+    'LICENSE-MIT',
+    'LICENSE-BSD',
+    'MIT-LICENSE',
+    'README',
+    'Readme'
   ];
+  let possibleLicenseExtensions = [
+    '.md',
+    '.markdown',
+    '.txt'
+  ];
+  possibleLicenseNames.forEach(name => { possibleLicenseNames.push(name.toLowerCase()) });
+  possibleLicenseExtensions.forEach(extension => { possibleLicenseExtensions.push(extension.toUpperCase()) });
+  possibleLicenseExtensions.push('');
+
+  possibleLicenseNames.forEach(name => {
+    possibleLicensePaths.forEach(extension => {
+      possibleLicensePaths.push(path.join(projectPath, name + extension));
+    });
+  });
 
   let unlicense = 'NO LICENSE FILE' + convertNewLines('\n');
 
