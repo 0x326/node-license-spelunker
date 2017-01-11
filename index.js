@@ -1,24 +1,31 @@
 #!/usr/bin/env node
 
-const path = require('path');
-const fs = require('fs');
-const async = require('async');
 const argv = require('yargs')
   .usage('Usage: $0 [dir/] -o [outputFile]')
   .option('output', {
-      alias: 'o',
-      describe: 'Output file'
-    })
+    alias: 'o',
+    describe: 'Output file'
+  })
+  .option('end-of-line', {
+    alias: 'eol',
+    describe: 'Desired Line Endings',
+    choices: ['lf', 'crlf', 'cr']
+  })
   .count('verbose')
   .alias('v', 'verbose')
   .argv;
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
+const async = require('async');
+const steno = require('steno');
 
 const VERBOSE_LEVEL = argv.verbose;
 const INFO_LEVEL = 1;
 const DEBUG_LEVEL = 2;
 
 let rootProjectPath;
-if (argv.length > 0) {
+if (argv._.length > 0) {
   rootProjectPath = path.resolve(argv._[0]);
 }
 else {
@@ -26,8 +33,25 @@ else {
 }
 if (VERBOSE_LEVEL >= 0) {
   console.log('Project Path', rootProjectPath);
+  console.log('');
 }
 let rootProjectPackage = require(path.join(rootProjectPath, 'package.json'));
+
+let desiredLineEndings;
+if (argv['end-of-line']) {
+  desiredLineEndings = argv['end-of-line'];
+}
+else if (os.EOL == '\r\n') {
+  desiredLineEndings = 'CRLF';
+}
+else if (os.EOL == '\r') {
+  desiredLineEndings = 'CR';
+}
+else {
+  desiredLineEndings = 'LF';
+}
+
+const convertNewLines = require("convert-newline")(desiredLineEndings.toLowerCase()).string();
 
 let modules = [];
 let recursiveLevel = 0;
@@ -41,7 +65,7 @@ function exploreDependencies(packagePath) {
   let package = require(path.join(packagePath, 'package.json'));
   let nodeModulesPath = path.join(packagePath, 'node_modules');
   recursiveLevel++;
-  
+
   if (VERBOSE_LEVEL >= DEBUG_LEVEL) {
     console.log('package.json license', package.license);
   }
@@ -79,24 +103,36 @@ function exploreDependencies(packagePath) {
     if (recursiveLevel === 0) {
       let improperlyLicensedModules = modules.filter(m => m.license === 'NO LICENSE FILE' );
       let unlicensedModules = improperlyLicensedModules.filter(m => !m.pkgLicense );
-      console.log('# LICENSE FILE REPORT FOR', rootProjectPackage.name);
+      let report = '# LICENSE FILE REPORT FOR ' + rootProjectPackage.name + '\n';
+      console.log('%d licensed dependencies (including dependencies of dependencies)', modules.length);
+      console.log('%d dependencies without license text but with license indicator', improperlyLicensedModules.length);
+      console.log('%d unlicensed dependencies', unlicensedModules.length);
       console.log('');
-      console.log(modules.length, 'nested dependencies')
-      console.log(improperlyLicensedModules.length, 'without identifiable license text')
-      console.log(unlicensedModules.length, 'without even a package.json license declaration', '\n\n')
-      modules.forEach(function(m) {
-        console.log('##', m.name);
-        console.log('');
-        console.log(m.name + '@' + m.version);
-        console.log(m.url);
-        console.log(m.localPath);
-        if (m.pkgLicense) {
-          console.log('From package.json license property:', JSON.stringify(m.pkgLicense));
+      modules.forEach(module => {
+        report += '## ' + module.name + '\n\n';
+        if (VERBOSE_LEVEL >= INFO_LEVEL) {
+          console.log(module.name + '@' + module.version);
+          console.log(module.url);
+          if (module.localPath.length > 0) {
+            console.log(module.localPath);
+          }
+          if (module.pkgLicense) {
+            console.log('From package.json license property:', JSON.stringify(module.pkgLicense));
+          }
+          console.log('');
         }
-        console.log('');
-        console.log(m.license);
-        console.log('');
+        report += module.license + '\n';
       });
+      if (argv.output) {
+        steno.writeFile(argv.output, report, err => {
+          if (err) {
+            console.error('Error writing file');
+          }
+        });
+      }
+      else {
+        console.log(report);
+      }
     }
   });
 }
@@ -148,7 +184,7 @@ function findLicenseText(projectPath, callback) {
             if (VERBOSE_LEVEL >= DEBUG_LEVEL) {
               console.log(licenseExcerpt.input.substring(licenseExcerpt.index));
             }
-            return callback(null, 'FROM README:\n' + licenseExcerpt.input.substring(licenseExcerpt.index));
+            return callback(null, 'FROM README:\n' + convertNewLines(licenseExcerpt.input.substring(licenseExcerpt.index)));
           }
           else {
             // Nothing found in README
@@ -157,9 +193,9 @@ function findLicenseText(projectPath, callback) {
         }
 
         // Update with file text
-        return callback(null, text);
+        return callback(null, convertNewLines(text));
       });
-      
+
     });
   }, function (err, license) {
     if (err) {
