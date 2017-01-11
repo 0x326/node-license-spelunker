@@ -218,14 +218,18 @@ function isPackage(dirPath, callback) {
     let isModuleDir = false;
     if (err) {
       console.error(err);
+      callback(false);
     }
     else if (stat.isDirectory()) {
       fs.access(packageManifest, fs.constants.F_OK, (err) => {
         // If there is no error, then the directory must contain a module
         isModuleDir = err === null;
+        callback(isModuleDir);
       });
     }
-    callback(isModuleDir);
+    else {
+      callback(isModuleDir);
+    }
   });
 }
 
