@@ -1,9 +1,13 @@
-Attempt to find the licenses of all of you node.js dependencies recursively and 
+Attempt to find the licenses of all of you node.js dependencies recursively and
 create a simple report that includes the license details.
 
 ## Install
 
 	npm install -g license-spelunker
+
+Or, if the following works for you
+
+    yarn global add license-spelunker
 
 ## Usage
 
@@ -15,7 +19,7 @@ For example, from within a project
 
 To a file
 
-	license-spelunker > license-report.txt
+	license-spelunker -o license-report.txt
 
 The output will look something like this:
 
