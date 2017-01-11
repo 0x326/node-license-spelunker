@@ -33,7 +33,6 @@ else {
 }
 if (VERBOSE_LEVEL >= 0) {
   console.log('Project Path', rootProjectPath);
-  console.log('');
 }
 let rootProjectPackage = require(path.join(rootProjectPath, 'package.json'));
 
@@ -101,9 +100,10 @@ function exploreDependencies(packagePath) {
     recursiveLevel--;
 
     if (recursiveLevel === 0) {
-      let improperlyLicensedModules = modules.filter(m => m.license === 'NO LICENSE FILE' );
+      let improperlyLicensedModules = modules.filter(m => m.license === 'NO LICENSE FILE' + convertNewLines('\n'));
       let unlicensedModules = improperlyLicensedModules.filter(m => !m.pkgLicense );
       let report = '# LICENSE FILE REPORT FOR ' + rootProjectPackage.name + '\n';
+      console.log('');
       console.log('%d licensed dependencies (including dependencies of dependencies)', modules.length);
       console.log('%d dependencies without license text but with license indicator', improperlyLicensedModules.length);
       console.log('%d unlicensed dependencies', unlicensedModules.length);
@@ -157,7 +157,7 @@ function findLicenseText(projectPath, callback) {
     path.join(projectPath, 'README.markdown')
   ];
 
-  let unlicense = "NO LICENSE FILE";
+  let unlicense = 'NO LICENSE FILE' + convertNewLines('\n');
 
   async.reduceRight(possibleLicensePaths, unlicense, function (license, licensePath, callback) {
     let isAReadme = (licensePath.toLowerCase().indexOf('/readme') > 0);
@@ -184,7 +184,7 @@ function findLicenseText(projectPath, callback) {
             if (VERBOSE_LEVEL >= DEBUG_LEVEL) {
               console.log(licenseExcerpt.input.substring(licenseExcerpt.index));
             }
-            return callback(null, 'FROM README:\n' + convertNewLines(licenseExcerpt.input.substring(licenseExcerpt.index)));
+            return callback(null, 'FROM README:' + convertNewLines('\n' + licenseExcerpt.input.substring(licenseExcerpt.index)));
           }
           else {
             // Nothing found in README
