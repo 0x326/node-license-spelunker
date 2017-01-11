@@ -157,7 +157,7 @@ function findLicenseText(projectPath, callback) {
     path.join(projectPath, 'README.markdown')
   ];
 
-  let unlicense  = "NO LICENSE FILE";
+  let unlicense = "NO LICENSE FILE";
 
   async.reduceRight(possibleLicensePaths, unlicense, function (license, licensePath, callback) {
     let isAReadme = (licensePath.toLowerCase().indexOf('/readme') > 0);
@@ -175,7 +175,7 @@ function findLicenseText(projectPath, callback) {
       fs.readFile(licensePath, { encoding: 'utf8' }, function (err, text) {
         if (err) {
           console.error(err);
-          return (err, license);
+          return callback(err, license);
         }
 
         if (isAReadme) {
