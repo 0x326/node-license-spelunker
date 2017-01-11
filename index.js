@@ -163,7 +163,7 @@ function findLicenseText(projectPath, callback) {
   possibleLicenseExtensions.push('');
 
   possibleLicenseNames.forEach(name => {
-    possibleLicensePaths.forEach(extension => {
+    possibleLicenseExtensions.forEach(extension => {
       possibleLicensePaths.push(path.join(projectPath, name + extension));
     });
   });
