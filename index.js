@@ -195,18 +195,18 @@ function findLicenseText(projectPath, callback) {
             if (VERBOSE_LEVEL >= DEBUG_LEVEL) {
               console.log(licenseExcerpt.input.substring(licenseExcerpt.index));
             }
-            return callback(null, 'FROM README:' + convertNewLines('\n' + licenseExcerpt.input.substring(licenseExcerpt.index)));
-          }
-          else {
-            // Nothing found in README
-            return callback(null, license);
+            license = 'FROM README:' + convertNewLines('\n' + licenseExcerpt.input.substring(licenseExcerpt.index));
           }
         }
-
-        // Update with file text
-        return callback(null, convertNewLines(text));
+        else {
+          // Update with file text
+          if (!text.endsWith('\n')) {
+            text += '\n';
+          }
+          license = convertNewLines(text);
+        }
+        return callback(null, license);
       });
-
     });
   }, function (err, license) {
     if (err) {
