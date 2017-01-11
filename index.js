@@ -88,15 +88,17 @@ function exploreDependencies(packagePath) {
     }
   });
 
-  findLicenseText(packagePath, function (license) {
-    modules.push({
-      name: package.name,
-      version: package.version,
-      url: 'https://www.npmjs.com/package/' + package.name,
-      localPath: path.relative(rootProjectPath, packagePath),
-      pkgLicense: package.license,
-      license: license
-    });
+  findLicenseText(packagePath, (license) => {
+    if (!modules.some(module => module.name == package.name)) {
+      modules.push({
+        name: package.name,
+        version: package.version,
+        url: 'https://www.npmjs.com/package/' + package.name,
+        localPath: path.relative(rootProjectPath, packagePath),
+        pkgLicense: package.license,
+        license: license
+      });
+    }
     recursiveLevel--;
 
     if (recursiveLevel === 0) {
