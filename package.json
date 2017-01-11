@@ -17,6 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "async": "~0.2.9",
+    "convert-newline": "^0.0.5",
+    "steno": "^0.4.4",
     "yargs": "^6.6.0"
   }
 }
