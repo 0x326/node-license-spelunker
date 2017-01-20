@@ -13,6 +13,8 @@ const argv = require('yargs')
   })
   .count('verbose')
   .alias('v', 'verbose')
+  .array('ignore')
+  .alias('i', 'ignore')
   .argv;
 const os = require('os');
 const path = require('path');
